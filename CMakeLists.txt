@@ -1,0 +1,35 @@
+cmake_minimum_required (VERSION 3.2)
+
+project(Project4)
+
+SET(CMAKE_C_COMPILER /usr/local/bin/gcc-12)
+SET(CMAKE_CXX_COMPILER /usr/local/bin/g++-12)
+
+find_package(OpenMP)
+if(NOT OpenMP_FOUND)
+    message("OpenMP not found.\nTry to set the flags")
+    SET(OpenMP_C_FLAGS -I/usr/local/opt/libomp/include)
+    SET(OpenMP_C_LIB_NAMES libomp)
+    SET(OpenMP_CXX_FLAGS -I/usr/local/opt/libomp/include)
+    SET(OpenMP_CXX_LIB_NAMES libomp)
+    SET(OpenMP_libomp_LIBRARY /usr/local/opt/libomp/lib/libomp.dylib)
+endif()
+
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
+add_compile_options(-Wall)
+add_compile_options(-fopenmp)
+add_compile_options(-lopenblas)
+add_compile_options(-O3)
+add_executable(test main.c Matrix.c)
+
+find_package(OpenMP)
+if(OpenMP_C_FOUND)
+    message("OpenMP found.")
+    target_link_libraries(test PUBLIC OpenMP::OpenMP_C)
+endif()
+
+find_package(BLAS)
+if(BLAS_FOUND)
+    message("BLAS found.")
+    target_link_libraries(test PUBLIC BLAS)
+endif()
