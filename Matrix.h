@@ -5,13 +5,15 @@
 #include <string.h>
 #include <immintrin.h>
 #include <math.h>
-#include </usr/local/opt/libomp/include/omp.h>
+#include <omp.h>
+
+#define _OMP_THREAD_ 4
 
 #ifndef deleteMat
 #define deleteMat(Mat) (deleteMatrix(Mat), Mat = NULL)
 #endif
 
-#define data_Type double
+typedef double data_Type;
 
 typedef struct Matrix
 {
