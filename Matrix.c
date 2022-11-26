@@ -173,6 +173,7 @@ pMatrix Strassen(pMatrix A, size_t index_A, pMatrix B, size_t index_B, size_t si
     deleteMat(S10);
 
     pMatrix C = CreateMatrix(size, size, NULL);
+    memset(C->data,0,size*size*sizeof(data_Type));
     size_t c11 = 0, c12 = c11 + new_size, c21 = c11 + new_size * size, c22 = c21 + new_size;
     plus_for_Strassen(P5, 0, P4, 0, C, c11, new_size);
     minus_for_Strassen(C, c11, P2, 0, C, c11, new_size);
@@ -189,7 +190,6 @@ pMatrix Strassen(pMatrix A, size_t index_A, pMatrix B, size_t index_B, size_t si
     deleteMat(P3);
     minus_for_Strassen(C, c22, P7, 0, C, c22, new_size);
     deleteMat(P7);
-
     return C;
 }
 

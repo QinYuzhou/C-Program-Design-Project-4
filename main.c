@@ -26,12 +26,14 @@ int main(int args, char *argv[])
 {
     struct timeval start, end;
     double duration, cnt1 = 0, cnt2 = 0, cnt3 = 0;
+    int size = 13;
     pMatrix A, B, C, D, E;
     printf("Create A\n");
-    A = create_random_Matrix(1 << 13);
+    A = create_random_Matrix(1ll << size);
     printf("Create B\n");
-    B = create_random_Matrix(1 << 13);
+    B = create_random_Matrix(1ll << size);
     printf("Create Over\n");
+
     C = matmul_plain(A, B);
     TIME_START
     C = matmul_plain(A, B);

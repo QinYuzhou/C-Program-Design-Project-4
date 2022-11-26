@@ -13,7 +13,7 @@
 #define deleteMat(Mat) (deleteMatrix(Mat), Mat = NULL)
 #endif
 
-typedef double data_Type;
+typedef float data_Type;
 
 typedef struct Matrix
 {
