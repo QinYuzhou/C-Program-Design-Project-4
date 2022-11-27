@@ -13,9 +13,11 @@ inline double rand_num()
     return ((double)rand() / RAND_MAX) * 10;
 }
 
-pMatrix create_random_Matrix(size_t size)
+Matrix* create_random_Matrix(size_t size)
 {
-    pMatrix ret = CreateMatrix(size, size, NULL);
+    
+
+Matrix* ret = CreateMatrix(size, size, NULL);
     size *= size;
     for (size_t i = 0; i < size; i++)
         ret->data[i] = rand_num();
@@ -26,35 +28,35 @@ int main(int args, char *argv[])
 {
     struct timeval start, end;
     double duration, cnt1 = 0, cnt2 = 0, cnt3 = 0;
-    int size = 16;
-    pMatrix A, B, C, D, E;
+    int size = 13;
+    Matrix* A, *B, *C, *D, *E;
     printf("Create A\n");
     A = create_random_Matrix(1ll << size);
     printf("Create B\n");
     B = create_random_Matrix(1ll << size);
     printf("Create Over\n");
 
-    C = matmul_plain(A, B);
-    TIME_START
-    C = matmul_plain(A, B);
-    TIME_END("plain")
-    cnt1 += duration;
-    TIME_START
-    C = matmul_plain(A, B);
-    TIME_END("plain")
-    cnt1 += duration;
-    TIME_START
-    C = matmul_plain(A, B);
-    TIME_END("plain")
-    cnt1 += duration;
-    TIME_START
-    C = matmul_plain(A, B);
-    TIME_END("plain")
-    cnt1 += duration;
-    TIME_START
-    C = matmul_plain(A, B);
-    TIME_END("plain")
-    cnt1 += duration;
+    // C = matmul_plain(A, B);
+    // TIME_START
+    // C = matmul_plain(A, B);
+    // TIME_END("plain")
+    // cnt1 += duration;
+    // TIME_START
+    // C = matmul_plain(A, B);
+    // TIME_END("plain")
+    // cnt1 += duration;
+    // TIME_START
+    // C = matmul_plain(A, B);
+    // TIME_END("plain")
+    // cnt1 += duration;
+    // TIME_START
+    // C = matmul_plain(A, B);
+    // TIME_END("plain")
+    // cnt1 += duration;
+    // TIME_START
+    // C = matmul_plain(A, B);
+    // TIME_END("plain")
+    // cnt1 += duration;
 
     D = matmul_improved(A, B);
     TIME_START

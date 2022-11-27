@@ -22,7 +22,7 @@
 &emsp;&emsp;由于本次Project中需要比较不同矩阵乘法的效率和准确度，所以我写了一个similar函数来比较两个矩阵之间的元素差异最后返回两个矩阵中相同位置的差的绝对值最大值。
 
 ```c
-double similar(pMatrix mat_1, pMatrix mat_2) //比较两个矩阵是否相似
+double similar(Matrix *mat_1, Matrix *mat_2) //比较两个矩阵是否相似
 {
     if (mat_1 == NULL || mat_2 == NULL)
         return -1;
@@ -30,7 +30,7 @@ double similar(pMatrix mat_1, pMatrix mat_2) //比较两个矩阵是否相似
         return -1;
     double differ = 0;
     for (size_t i = 0; i < mat_1->col * mat_2->row; i++)
-        differ = fmax(differ, fabs(mat_1->data[i] - mat_2->data[i]));
+        differ = fmax(differ, fabs(mat_1->data[i] - mat_2->data[i]) / fmin(mat_1->data[i], mat_2->data[i]));
     return differ;
 }
 ```
@@ -46,7 +46,7 @@ double similar(pMatrix mat_1, pMatrix mat_2) //比较两个矩阵是否相似
 &emsp;&emsp;这次Project中的matmul_plain函数，我使用的是ikj循环的方式通过三重循环来计算矩阵乘法，时间复杂度为$O(n^3)$。
 
 ```c
-pMatrix matmul_plain(pMatrix mat_1, pMatrix mat_2) //使用三重循环计算矩阵乘法
+Matrix *matmul_plain(Matrix *mat_1, Matrix *mat_2) //使用三重循环计算矩阵乘法
 {
     if (mat_1 == NULL || mat_2 == NULL)
         return NULL;
@@ -54,7 +54,7 @@ pMatrix matmul_plain(pMatrix mat_1, pMatrix mat_2) //使用三重循环计算矩
         return NULL;
     if (mat_1->col != mat_2->row)
         return NULL;
-    pMatrix ret = CreateMatrix(mat_1->row, mat_2->col, NULL);
+    Matrix *ret = CreateMatrix(mat_1->row, mat_2->col, NULL);
     for (size_t i = 0; i < mat_1->row; i++)
         for (size_t j = 0; j < mat_1->col; j++)
             for (size_t k = 0; k < mat_2->col; k++)
@@ -240,7 +240,7 @@ $$
 &emsp;&emsp;我写了一个similar函数，用来对比两个矩阵对应元素之间的差，并返回误差占原数的比例的最大值。
 
 ```c
-double similar(pMatrix mat_1, pMatrix mat_2) //比较两个矩阵是否相似
+double similar(Matrix *mat_1, Matrix *mat_2) //比较两个矩阵是否相似
 {
     if (mat_1 == NULL || mat_2 == NULL)
         return -1;
@@ -337,27 +337,27 @@ typedef struct Matrix
     size_t col;
     data_Type *data;
 } Matrix;
-typedef Matrix *pMatrix;
 
-pMatrix CreateMatrix(size_t, size_t, data_Type *); //创建一个_row行_col列的矩阵，并更新其中元素，如果_data为NULL则将矩阵中的元素全部定为0
+Matrix *CreateMatrix(size_t, size_t, data_Type *); //创建一个_row行_col列的矩阵，并更新其中元素，如果_data为NULL则将矩阵中的元素全部定为0
 
-void deleteMatrix(pMatrix); //删除矩阵,释放空间
+void deleteMatrix(Matrix *); //删除矩阵,释放空间
 
-pMatrix readFile(FILE *); //从文件读入矩阵
+Matrix *readFile(FILE *); //从文件读入矩阵
 
-pMatrix matmul_plain(pMatrix, pMatrix); //使用三重循环计算矩阵乘法
+Matrix *matmul_plain(Matrix *, Matrix *); //使用三重循环计算矩阵乘法
 
-void plus_for_Strassen(pMatrix, size_t, pMatrix, size_t, pMatrix, size_t, size_t); // Strassen算法中的加法
+void plus_for_Strassen(Matrix *, size_t, Matrix *, size_t, Matrix *, size_t, size_t); // Strassen算法中的加法
 
-void minus_for_Strassen(pMatrix, size_t, pMatrix, size_t, pMatrix, size_t, size_t); // Strassen算法中的减法
+void minus_for_Strassen(Matrix *, size_t, Matrix *, size_t, Matrix *, size_t, size_t); // Strassen算法中的减法
 
-pMatrix Strassen(pMatrix, size_t, pMatrix, size_t, size_t); // Strassen算法，返回A*B的结果
+Matrix *Strassen(Matrix *, size_t, Matrix *, size_t, size_t); // Strassen算法，返回A*B的结果
 
-pMatrix matmul_improved(pMatrix, pMatrix); //优化矩阵乘法
+Matrix *matmul_improved(Matrix *, Matrix *); //优化矩阵乘法
 
-void printMatrix(pMatrix); //输出矩阵
+void printMatrix(Matrix *); //输出矩阵
 
-double similar(pMatrix, pMatrix); //比较两个矩阵是否相似
+double similar(Matrix *, Matrix *); //比较两个矩阵是否相似
+
 ```
 
 ### Matrix.c
@@ -365,9 +365,9 @@ double similar(pMatrix, pMatrix); //比较两个矩阵是否相似
 ```c
 #include "Matrix.h"
 
-pMatrix CreateMatrix(size_t _row, size_t _col, data_Type *_data) //创建一个_row行_col列的矩阵，并更新其中元素，如果_data为NULL则将矩阵中的元素全部定为0
+Matrix *CreateMatrix(size_t _row, size_t _col, data_Type *_data) //创建一个_row行_col列的矩阵，并更新其中元素，如果_data为NULL则将矩阵中的元素全部定为0
 {
-    pMatrix ret = malloc(sizeof(Matrix));
+    Matrix *ret = malloc(sizeof(Matrix));
     ret->row = _row;
     ret->col = _col;
     if (_data == NULL)
@@ -377,7 +377,7 @@ pMatrix CreateMatrix(size_t _row, size_t _col, data_Type *_data) //创建一个_
     return ret;
 }
 
-void deleteMatrix(pMatrix mat) //删除矩阵,释放空间
+void deleteMatrix(Matrix *mat) //删除矩阵,释放空间
 {
     if (mat == NULL)
         return;
@@ -387,9 +387,9 @@ void deleteMatrix(pMatrix mat) //删除矩阵,释放空间
     return;
 }
 
-pMatrix readFile(FILE *file) //从文件读入矩阵
+Matrix *readFile(FILE *file) //从文件读入矩阵
 {
-    pMatrix mat = malloc(sizeof(Matrix));
+    Matrix *mat = malloc(sizeof(Matrix));
     fscanf(file, "%zu %zu", &mat->row, &mat->col);
     mat->data = aligned_alloc(256, sizeof(data_Type) * mat->row * mat->col);
     if (sizeof(data_Type) == 8)
@@ -401,7 +401,7 @@ pMatrix readFile(FILE *file) //从文件读入矩阵
     return mat;
 }
 
-pMatrix matmul_plain(pMatrix mat_1, pMatrix mat_2) //使用三重循环计算矩阵乘法
+Matrix *matmul_plain(Matrix *mat_1, Matrix *mat_2) //使用三重循环计算矩阵乘法
 {
     if (mat_1 == NULL || mat_2 == NULL)
         return NULL;
@@ -409,7 +409,7 @@ pMatrix matmul_plain(pMatrix mat_1, pMatrix mat_2) //使用三重循环计算矩
         return NULL;
     if (mat_1->col != mat_2->row)
         return NULL;
-    pMatrix ret = CreateMatrix(mat_1->row, mat_2->col, NULL);
+    Matrix *ret = CreateMatrix(mat_1->row, mat_2->col, NULL);
     for (size_t i = 0; i < mat_1->row; i++)
         for (size_t j = 0; j < mat_1->col; j++)
             for (size_t k = 0; k < mat_2->col; k++)
@@ -417,7 +417,7 @@ pMatrix matmul_plain(pMatrix mat_1, pMatrix mat_2) //使用三重循环计算矩
     return ret;
 }
 
-void plus_for_Strassen(pMatrix mat_1, size_t startIndex_1, pMatrix mat_2, size_t startIndex_2, pMatrix mat_3, size_t startIndex_3, size_t size) // Strassen算法中的加法
+void plus_for_Strassen(Matrix *mat_1, size_t startIndex_1, Matrix *mat_2, size_t startIndex_2, Matrix *mat_3, size_t startIndex_3, size_t size) // Strassen算法中的加法
 {
     if (sizeof(data_Type) == 8)
     {
@@ -443,7 +443,7 @@ void plus_for_Strassen(pMatrix mat_1, size_t startIndex_1, pMatrix mat_2, size_t
     }
 }
 
-void minus_for_Strassen(pMatrix mat_1, size_t startIndex_1, pMatrix mat_2, size_t startIndex_2, pMatrix mat_3, size_t startIndex_3, size_t size) // Strassen算法中的减法
+void minus_for_Strassen(Matrix *mat_1, size_t startIndex_1, Matrix *mat_2, size_t startIndex_2, Matrix *mat_3, size_t startIndex_3, size_t size) // Strassen算法中的减法
 {
 
     if (sizeof(data_Type) == 8)
@@ -470,11 +470,11 @@ void minus_for_Strassen(pMatrix mat_1, size_t startIndex_1, pMatrix mat_2, size_
     }
 }
 
-pMatrix Strassen(pMatrix A, size_t index_A, pMatrix B, size_t index_B, size_t size) // Strassen算法，返回A*B的结果
+Matrix *Strassen(Matrix *A, size_t index_A, Matrix *B, size_t index_B, size_t size) // Strassen算法，返回A*B的结果
 {
     if (size <= 128)
     {
-        pMatrix ret = CreateMatrix(size, size, NULL);
+        Matrix *ret = CreateMatrix(size, size, NULL);
         memset(ret->data, 0, ret->col * ret->row * sizeof(data_Type));
 #pragma omp parallel for num_threads(_OMP_THREAD_)
         for (size_t i = 0; i < size; i++)
@@ -493,51 +493,52 @@ pMatrix Strassen(pMatrix A, size_t index_A, pMatrix B, size_t index_B, size_t si
     size_t a11 = index_A, a12 = a11 + new_size, a21 = a11 + new_size * A->col, a22 = a21 + new_size;
     size_t b11 = index_B, b12 = b11 + new_size, b21 = b11 + new_size * B->col, b22 = b21 + new_size;
 
-    pMatrix S1 = CreateMatrix(new_size, new_size, NULL);
+    Matrix *S1 = CreateMatrix(new_size, new_size, NULL);
     minus_for_Strassen(B, b12, B, b22, S1, 0, new_size);
-    pMatrix P1 = Strassen(A, a11, S1, 0, new_size);
+    Matrix *P1 = Strassen(A, a11, S1, 0, new_size);
     deleteMat(S1);
 
-    pMatrix S2 = CreateMatrix(new_size, new_size, NULL);
+    Matrix *S2 = CreateMatrix(new_size, new_size, NULL);
     plus_for_Strassen(A, a11, A, a12, S2, 0, new_size);
-    pMatrix P2 = Strassen(S2, 0, B, b22, new_size);
+    Matrix *P2 = Strassen(S2, 0, B, b22, new_size);
     deleteMat(S2);
 
-    pMatrix S3 = CreateMatrix(new_size, new_size, NULL);
+    Matrix *S3 = CreateMatrix(new_size, new_size, NULL);
     plus_for_Strassen(A, a21, A, a22, S3, 0, new_size);
-    pMatrix P3 = Strassen(S3, 0, B, b11, new_size);
+    Matrix *P3 = Strassen(S3, 0, B, b11, new_size);
     deleteMat(S3);
 
-    pMatrix S4 = CreateMatrix(new_size, new_size, NULL);
+    Matrix *S4 = CreateMatrix(new_size, new_size, NULL);
     minus_for_Strassen(B, b21, B, b11, S4, 0, new_size);
-    pMatrix P4 = Strassen(A, a22, S4, 0, new_size);
+    Matrix *P4 = Strassen(A, a22, S4, 0, new_size);
     deleteMat(S4);
 
-    pMatrix S5 = CreateMatrix(new_size, new_size, NULL);
+    Matrix *S5 = CreateMatrix(new_size, new_size, NULL);
     plus_for_Strassen(A, a11, A, a22, S5, 0, new_size);
-    pMatrix S6 = CreateMatrix(new_size, new_size, NULL);
+    Matrix *S6 = CreateMatrix(new_size, new_size, NULL);
     plus_for_Strassen(B, b11, B, b22, S6, 0, new_size);
-    pMatrix P5 = Strassen(S5, 0, S6, 0, new_size);
+    Matrix *P5 = Strassen(S5, 0, S6, 0, new_size);
     deleteMat(S5);
     deleteMat(S6);
 
-    pMatrix S7 = CreateMatrix(new_size, new_size, NULL);
+    Matrix *S7 = CreateMatrix(new_size, new_size, NULL);
     minus_for_Strassen(A, a12, A, a22, S7, 0, new_size);
-    pMatrix S8 = CreateMatrix(new_size, new_size, NULL);
+    Matrix *S8 = CreateMatrix(new_size, new_size, NULL);
     plus_for_Strassen(B, b21, B, b22, S8, 0, new_size);
-    pMatrix P6 = Strassen(S7, 0, S8, 0, new_size);
+    Matrix *P6 = Strassen(S7, 0, S8, 0, new_size);
     deleteMat(S7);
     deleteMat(S8);
 
-    pMatrix S9 = CreateMatrix(new_size, new_size, NULL);
+    Matrix *S9 = CreateMatrix(new_size, new_size, NULL);
     minus_for_Strassen(A, a11, A, a21, S9, 0, new_size);
-    pMatrix S10 = CreateMatrix(new_size, new_size, NULL);
+    Matrix *S10 = CreateMatrix(new_size, new_size, NULL);
     plus_for_Strassen(B, b11, B, b12, S10, 0, new_size);
-    pMatrix P7 = Strassen(S9, 0, S10, 0, new_size);
+    Matrix *P7 = Strassen(S9, 0, S10, 0, new_size);
     deleteMat(S9);
     deleteMat(S10);
 
-    pMatrix C = CreateMatrix(size, size, NULL);
+    Matrix *C = CreateMatrix(size, size, NULL);
+    memset(C->data, 0, size * size * sizeof(data_Type));
     size_t c11 = 0, c12 = c11 + new_size, c21 = c11 + new_size * size, c22 = c21 + new_size;
     plus_for_Strassen(P5, 0, P4, 0, C, c11, new_size);
     minus_for_Strassen(C, c11, P2, 0, C, c11, new_size);
@@ -554,11 +555,10 @@ pMatrix Strassen(pMatrix A, size_t index_A, pMatrix B, size_t index_B, size_t si
     deleteMat(P3);
     minus_for_Strassen(C, c22, P7, 0, C, c22, new_size);
     deleteMat(P7);
-
     return C;
 }
 
-pMatrix matmul_improved(pMatrix mat_1, pMatrix mat_2) //优化矩阵乘法
+Matrix *matmul_improved(Matrix *mat_1, Matrix *mat_2) //优化矩阵乘法
 {
     if (mat_1 == NULL || mat_2 == NULL)
         return NULL;
@@ -571,7 +571,7 @@ pMatrix matmul_improved(pMatrix mat_1, pMatrix mat_2) //优化矩阵乘法
     return Strassen(mat_1, 0, mat_2, 0, mat_1->col);
 }
 
-void printMatrix(pMatrix mat) //输出矩阵
+void printMatrix(Matrix *mat) //输出矩阵
 {
     if (mat == NULL)
         return;
@@ -586,7 +586,7 @@ void printMatrix(pMatrix mat) //输出矩阵
     printf("\n");
 }
 
-double similar(pMatrix mat_1, pMatrix mat_2) //比较两个矩阵是否相似
+double similar(Matrix *mat_1, Matrix *mat_2) //比较两个矩阵是否相似
 {
     if (mat_1 == NULL || mat_2 == NULL)
         return -1;
